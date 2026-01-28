@@ -3,7 +3,8 @@
 
 void printTable(__uint8_t *);
 char * returnBinary(int);
-bool verifyVictory(__uint8_t * rows);
+bool verifyVictory(__uint8_t *);
+bool checkValidPosition(__uint8_t *, __uint8_t);
 
 int main()
 {
@@ -28,8 +29,7 @@ int main()
         // converting the string into uint8
         sscanf(leitura, "%2hhu", &position);
 
-        if (position / 10 < 1 || position / 10 > 3 ||
-            position % 10 < 1 || position % 10 > 3)
+        if (!checkValidPosition(rows, position))
         {
             printf("invalid value\n");
             i--;
@@ -96,6 +96,19 @@ char * returnBinary(int num) {
     bin[8] = '\0';
     
     return bin;
+}
+
+bool checkValidPosition(__uint8_t * rows, __uint8_t position){
+    if(position / 10 < 1 || position / 10 > 3 ||
+            position % 10 < 1 || position % 10 > 3){
+                return false;
+            }
+
+    if(((rows[(position / 10) - 1] >> ((position % 10) - 1) * 2)  & 0x03) > 0){
+        return false;
+    }
+
+    return true;
 }
 
 bool verifyVictory(__uint8_t * rows){
