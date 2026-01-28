@@ -56,7 +56,6 @@ int main()
         //since the least amount of steps to victory is 5 the victory check is only only done from the 5th round foward
         if(i >= 4){
             if(verifyVictory(rows)){
-                printf("vitoria\n");
                 printTable(rows);
                 break;
             }
@@ -124,21 +123,20 @@ bool verifyVictory(__uint8_t * rows){
             return true;
         }
 
-        //left to right diagonal position (1, 1) to (3, 3)
-        //top row masked as 48    -> 00 11 00 00
-        //middle row masked as 12 -> 00 00 11 00
-        //bottom row masked as 3  -> 00 00 00 11
+        //right to left diagonal position (1, 3) to (3, 1)
+        //top row masked as 48    -> 00 11 00 00 -> * * X
+        //middle row masked as 12 -> 00 00 11 00 -> * X *
+        //bottom row masked as 3  -> 00 00 00 11 -> X * *
         //now shifting is necessary since 00 11 00 00 != 00 00 11 00 != 00 00 00 11
-
-        if(((rows[0] & 0x30) != 00) && (((rows[0] & 0x30 >> 4)) == ((rows[1] & 0x0c) >> 2)) && ((rows[1] & 0x0c) >> 2) == (rows[2] & 0x03) ){
-            printf("victory on the left to right diagonal\n");
+        if(((rows[0] & 0x30) != 00) && ((((rows[0] & 0x30) >> 4)) == ((rows[1] & 0x0c) >> 2)) && (((rows[1] & 0x0c) >> 2) == (rows[2] & 0x03)) ){
+            printf("victory on the right to left diagonal\n");
             return true;
         }
 
-        //right to left diagonal position (1, 3) to (3, 1)
-        //top row masked as 48    -> 00 00 00 11
-        //middle row masked as 12 -> 00 00 11 00
-        //bottom row masked as 3  -> 00 11 00 00
+        //left to right diagonal position (1, 1) to (3, 3)
+        //top row masked as 48    -> 00 00 00 11 -> X * *
+        //middle row masked as 12 -> 00 00 11 00 -> * X *
+        //bottom row masked as 3  -> 00 11 00 00 -> * * X
         if((rows[0] & 0x03) != 00 && ((rows[0] & 0x03) == ((rows[1] & 0x0c) >> 2)) && ((rows[1] & 0x0c) >> 2) == ((rows[2] & 0x30) >> 4) ){
             printf("%d\n", (rows[0] & 0x03));
             printf("%d\n", ((rows[1] & 0x0c) >> 2));
@@ -153,7 +151,7 @@ bool verifyVictory(__uint8_t * rows){
     //----------------------- -> 00 00 00 11
     //----------------------- -> 00 00 00 11
     if((rows[0] & 0x03) != 00 && ((rows[0] & 0x03) == (rows[1] & 0x03)) && (rows[1] & 0x03) == (rows[2] & 0x03)){
-        printf("victory on the right vertical");
+        printf("victory on the left vertical");
         return true;
     }
 
@@ -161,7 +159,7 @@ bool verifyVictory(__uint8_t * rows){
     //----------------------- -> 00 11 00 00
     //----------------------- -> 00 11 00 00
     if((rows[0] & 0x30) != 00 && ((rows[0] & 0x30) == (rows[1] & 0x30)) && (rows[1] & 0x30) == (rows[2] & 0x30)){
-        printf("victory on the left vertical");
+        printf("victory on the right vertical");
         return true;
     }
 
