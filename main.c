@@ -110,6 +110,7 @@ bool verifyVictory(__uint8_t * rows){
     
     for(__uint8_t i = 0; i < 3; i++){
         if(rows[i] == 21 || rows[i] == 63){
+            printf("victory on the horizontal %u\n" , i+1);
             return true;
         }
     }
@@ -118,7 +119,8 @@ bool verifyVictory(__uint8_t * rows){
         //making the middle vertical first 
         //0x0c -> 12 in binary mask 00001100 
         // if masked middle columns of the 3 gives the same value and are not 0 than is a victory situation
-        if((rows[0] & 0x0c) != 00 && ((rows[0] & 0x0c) == (rows[1] & 0x0c)) == (rows[2] & 0x0c) ){
+        if((rows[0] & 0x0c) != 00 && ((rows[0] & 0x0c) == (rows[1] & 0x0c)) && (rows[1] & 0x0c) == (rows[2] & 0x0c) ){
+            printf("victory on the middle vertical");
             return true;
         }
 
@@ -127,7 +129,9 @@ bool verifyVictory(__uint8_t * rows){
         //middle row masked as 12 -> 00 00 11 00
         //bottom row masked as 3  -> 00 00 00 11
         //now shifting is necessary since 00 11 00 00 != 00 00 11 00 != 00 00 00 11
-        if((rows[0] & 0x30) != 00 && (((rows[0] & 0x30 >> 4)) == ((rows[1] & 0x0c) >> 2)) == (rows[2] & 0x03) ){
+
+        if(((rows[0] & 0x30) != 00) && (((rows[0] & 0x30 >> 4)) == ((rows[1] & 0x0c) >> 2)) && ((rows[1] & 0x0c) >> 2) == (rows[2] & 0x03) ){
+            printf("victory on the left to right diagonal\n");
             return true;
         }
 
@@ -135,7 +139,11 @@ bool verifyVictory(__uint8_t * rows){
         //top row masked as 48    -> 00 00 00 11
         //middle row masked as 12 -> 00 00 11 00
         //bottom row masked as 3  -> 00 11 00 00
-        if((rows[0] & 0x03) != 00 && ((rows[0] & 0x03) == ((rows[1] & 0x0c) >> 2)) == ((rows[2] & 0x30) >> 4) ){
+        if((rows[0] & 0x03) != 00 && ((rows[0] & 0x03) == ((rows[1] & 0x0c) >> 2)) && ((rows[1] & 0x0c) >> 2) == ((rows[2] & 0x30) >> 4) ){
+            printf("%d\n", (rows[0] & 0x03));
+            printf("%d\n", ((rows[1] & 0x0c) >> 2));
+            printf("%d\n", ((rows[2] & 0x30) >> 4));
+            printf("victory on the right to left diagonal\n");
             return true;
         }
     }
@@ -144,14 +152,16 @@ bool verifyVictory(__uint8_t * rows){
     //verticals masked as 3   -> 00 00 00 11
     //----------------------- -> 00 00 00 11
     //----------------------- -> 00 00 00 11
-    if((rows[0] & 0x03) != 00 && ((rows[0] & 0x03) == (rows[1] & 0x03)) == (rows[2] & 0x03)){
+    if((rows[0] & 0x03) != 00 && ((rows[0] & 0x03) == (rows[1] & 0x03)) && (rows[1] & 0x03) == (rows[2] & 0x03)){
+        printf("victory on the right vertical");
         return true;
     }
 
     //verticals masked as 48  -> 00 11 00 00
     //----------------------- -> 00 11 00 00
     //----------------------- -> 00 11 00 00
-    if((rows[0] & 0x30) != 00 && ((rows[0] & 0x30) == (rows[1] & 0x30)) == (rows[2] & 0x30)){
+    if((rows[0] & 0x30) != 00 && ((rows[0] & 0x30) == (rows[1] & 0x30)) && (rows[1] & 0x30) == (rows[2] & 0x30)){
+        printf("victory on the left vertical");
         return true;
     }
 
