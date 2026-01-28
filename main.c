@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 void printTable(__uint8_t *);
 char * returnBinary(int);
+bool verifyVictory(__uint8_t * rows);
 
 int main()
 {
@@ -36,10 +38,10 @@ int main()
         // shifting 1 which is a binary pair (00000001) (2 << column * 2) -> (00010000) ( 01 mask for player 1 )
         // shifting 2 which is a binary pair (00000010) (2 << column * 2) -> (00110000) ( 11 mask for player 2 )
 
-        printf("inst 1/   %s\n", returnBinary((i % 2 == 0 ? 0x01 : 0x02) << ((position % 10) - 1) * 2));
-        printf("inst 2/   %s\n", returnBinary(rows[(position % 10) - 1]));
+        // printf("inst 1/   %s\n", returnBinary((i % 2 == 0 ? 0x01 : 0x02) << ((position % 10) - 1) * 2));
+        // printf("inst 2/   %s\n", returnBinary(rows[(position % 10) - 1]));
         
-        printf("inst 3/   %s\n", returnBinary((i % 2 == 0 ? 0x01 : 0x02) << ((position % 10) - 1) * 2 | rows[(position % 10) - 1]));
+        // printf("inst 3/   %s\n", returnBinary((i % 2 == 0 ? 0x01 : 0x02) << ((position % 10) - 1) * 2 | rows[(position % 10) - 1]));
 
         // ---------- debugging breakpoints ------------
         // rowIndex = (position / 10) - 1;
@@ -51,7 +53,16 @@ int main()
 
         rows[(position / 10) - 1] = ((i % 2 == 0 ? 0x01 : 0x02) << (((position % 10) - 1) * 2)) | rows[(position / 10) - 1];
 
-        printf("number on rows %s\n", returnBinary(rows[(position / 10) - 1]));
+        //since the least amount of steps to victory is 5 the victory check is only only done from the 5th round foward
+        if(i >= 4){
+            if(verifyVictory(rows)){
+                printf("vitoria\n");
+                printTable(rows);
+                break;
+            }
+        }
+
+        // printf("number on rows %s\n", returnBinary(rows[(position / 10) - 1]));
 
         printTable(rows);
     }
@@ -86,4 +97,63 @@ char * returnBinary(int num) {
     bin[8] = '\0';
     
     return bin;
+}
+
+bool verifyVictory(__uint8_t * rows){
+
+    // if the middle row is less than 4 all of the possibilities of a win from the middle are impossible
+    // if middle row is at least 4 the binary look like  00 00 (01) 00 which is a mark for player 1
+
+    //next are the other 3 horizontals since they can be read from the row itself
+    //the win condition on horizontal for X is to be 21 since  00 01 01 01 which is X X X
+    //the win condition on horizontal for O is to be 63 since  00 11 11 11 which is O O O
+    
+    for(__uint8_t i = 0; i < 3; i++){
+        if(rows[i] == 21 || rows[i] == 63){
+            return true;
+        }
+    }
+
+    if(rows[1] >= 4){
+        //making the middle vertical first 
+        //0x0c -> 12 in binary mask 00001100 
+        // if masked middle columns of the 3 gives the same value and are not 0 than is a victory situation
+        if((rows[0] & 0x0c) != 00 && ((rows[0] & 0x0c) == (rows[1] & 0x0c)) == (rows[2] & 0x0c) ){
+            return true;
+        }
+
+        //left to right diagonal position (1, 1) to (3, 3)
+        //top row masked as 48    -> 00 11 00 00
+        //middle row masked as 12 -> 00 00 11 00
+        //bottom row masked as 3  -> 00 00 00 11
+        //now shifting is necessary since 00 11 00 00 != 00 00 11 00 != 00 00 00 11
+        if((rows[0] & 0x30) != 00 && (((rows[0] & 0x30 >> 4)) == ((rows[1] & 0x0c) >> 2)) == (rows[2] & 0x03) ){
+            return true;
+        }
+
+        //right to left diagonal position (1, 3) to (3, 1)
+        //top row masked as 48    -> 00 00 00 11
+        //middle row masked as 12 -> 00 00 11 00
+        //bottom row masked as 3  -> 00 11 00 00
+        if((rows[0] & 0x03) != 00 && ((rows[0] & 0x03) == ((rows[1] & 0x0c) >> 2)) == ((rows[2] & 0x30) >> 4) ){
+            return true;
+        }
+    }
+
+    //now its only the other 2 verticals that are left
+    //verticals masked as 3   -> 00 00 00 11
+    //----------------------- -> 00 00 00 11
+    //----------------------- -> 00 00 00 11
+    if((rows[0] & 0x03) != 00 && ((rows[0] & 0x03) == (rows[1] & 0x03)) == (rows[2] & 0x03)){
+        return true;
+    }
+
+    //verticals masked as 48  -> 00 11 00 00
+    //----------------------- -> 00 11 00 00
+    //----------------------- -> 00 11 00 00
+    if((rows[0] & 0x30) != 00 && ((rows[0] & 0x30) == (rows[1] & 0x30)) == (rows[2] & 0x30)){
+        return true;
+    }
+
+    return false;
 }
